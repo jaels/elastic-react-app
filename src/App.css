@@ -1,0 +1,25 @@
+.App {
+  text-align: center;
+}
+
+.input-area {
+    text-align: center;
+}
+
+.input-field {
+    height: 50px;
+    width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+#submit-button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 30px;
+}
+
+.checkBox {
+    display: block;
+    margin-bottom: 30px;
+}

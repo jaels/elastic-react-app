@@ -1,4 +1,8 @@
 
+## About
+This app was written to practice elasticsearch with Javascript (in this case, ReactJS).
+It's using a sample json, the design is very minimal, and the code is not the cleanest or the most efficient.
+
 ## Getting started
 
 You will need to have `node` installed with a version `>=6`.

@@ -5,7 +5,6 @@ const esClient = new elasticsearch.Client({
 });
 
 
-var data = require('./shorter_data.json');
 
 const search = function search(index, body) {
     return esClient.search({
@@ -14,22 +13,21 @@ const search = function search(index, body) {
     });
 };
 
-exports.indexing = function() {
-    const bulkIndex = function bulkIndex(index, type, data) {
-        let bulkBody = [];
-        data.forEach(item => {
-            bulkBody.push({
-                index: {
-                    _index: index,
-                    _type: type,
-                    _id: item.id
-                }
-            });
-
-            bulkBody.push(item);
+exports.indexing = function(index, type, data) {
+    let bulkBody = [];
+    data.forEach(item => {
+        bulkBody.push({
+            index: {
+                _index: index,
+                _type: type,
+                _id: item.id
+            }
         });
 
+        bulkBody.push(item);
+    });
 
+    return new Promise(function(resolve, reject) {
         esClient.bulk({
                 body: bulkBody
             })
@@ -41,189 +39,24 @@ exports.indexing = function() {
                     }
                 });
                 console.log(`Successfully indexed ${data.length - errorCount} out of ${data.length} items`);
+                resolve("success");
             })
             .catch(console.err);
-    };
-
-    bulkIndex('library', 'default', data);
+    })
 }
-
-
-// exports.findIndices = function() {
-//     const indices = function indices() {
-//       return esClient.cat.indices({v: true})
-//       .then(console.log)
-//       .catch(err => console.error(`Error connecting to the es client: ${err}`));
-//     };
-//
-//     // only for testing purposes
-//     // all calls should be initiated through the module
-//     let test = function test() {
-//       console.log(`elasticsearch indices information:`);
-//       indices();
-//     };
-//
-//     test();
-//
-// }
-
-exports.searchAll = function() {
-
-    // only for testing purposes
-    // all calls should be initiated through the module
-    let test = function test() {
-        let body = {
-            size: 20,
-            from: 0,
-            query: {
-                match_all: {}
-            }
-        };
-
-        console.log(`retrieving all documents (displaying ${body.size} at a time)...`);
-
-        search('library', body)
-            .then(results => {
-                console.log(results);
-                console.log(`found ${results.hits.total} items in ${results.took}ms`);
-                console.log(`returned article titles:`);
-                results.hits.hits.forEach((hit, index) => console.log(`\t${body.from + ++index} - ${hit._source.title}`));
-            })
-            .catch(console.error);
-    };
-
-    test();
-}
-
-
-exports.searchBool = function() {
-    let body = {
-        size: 20,
-        from: 0,
-        query: {
-            bool: {
-                must: [{
-                    query_string: {
-                        query: '(authors.firstname:D* OR authors.lastname:H*) AND (title:excepteur)'
-                    }
-                }],
-                should: [{
-                    match_phrase: {
-                        body: 'Elit nisi fugiat dolore amet'
-                    }
-                }],
-                must_not: [{
-                    range: {
-                        year: {
-                            lte: 2000,
-                            gte: 1990
-                        }
-                    }
-                }]
-            }
-        }
-    };
-
-    console.log(`retrieving documents with a combined bool query (displaying ${body.size} items at a time)...`);
-    search('library', body)
-        .then(results => {
-            console.log(`found ${results.hits.total} items in ${results.took}ms`);
-            if (results.hits.total > 0) console.log(`returned article titles:`);
-            results.hits.hits.forEach((hit, index) => console.log(`\t${body.from + ++index} - ${hit._source.title} (score: ${hit._score})`));
-        })
-        .catch(console.error);
-};
-
-
-
-exports.searchMatch = function() {
-    let body = {
-        size: 20,
-        from: 0,
-        query: {
-            match: {
-                title: {
-                    query: 'Quist',
-                    minimum_should_match: 3,
-                    fuzziness: 2
-                }
-            }
-        }
-    };
-
-    console.log(`retrieving documents whose title matches '${body.query.match.title.query}' (displaying ${body.size} items at a time)...`);
-    search('library', body)
-        .then(results => {
-            console.log(`found ${results.hits.total} items in ${results.took}ms`);
-            if (results.hits.total > 0) console.log(`returned article titles:`);
-            results.hits.hits.forEach((hit, index) => console.log(`\t${body.from + ++index} - ${hit._source.title} (score: ${hit._score})`));
-        })
-        .catch(console.error);
-};
-
-
-exports.searchMatchPhrase = function() {
-    let body = {
-        size: 20,
-        from: 0,
-        query: {
-            match_phrase: {
-                title: {
-                    query: 'voluptate'
-                }
-            }
-        }
-    };
-
-    console.log(`retrieving documents whose title matches phrase (displaying ${body.size} items at a time)...`);
-    search('library', body)
-        .then(results => {
-            console.log(`found ${results.hits.total} items in ${results.took}ms`);
-            if (results.hits.total > 0) console.log(`returned article titles:`);
-            results.hits.hits.forEach((hit, index) => console.log(`\t${body.from + ++index} - ${hit._source.title} (score: ${hit._score})`));
-        })
-        .catch(console.error);
-};
-
-
-
-exports.searchMultiMatch = function(query, fields) {
-    let body = {
-        size: 20,
-        from: 0,
-        query: {
-            multi_match: {
-                query: query,
-                fields: fields
-            }
-        }
-    };
-
-    search('library', body)
-        .then(results => {
-            console.log(`found ${results.hits.total} items in ${results.took}ms`);
-            if (results.hits.total > 0) console.log(`returned article titles:`);
-            results.hits.hits.forEach((hit, index) => console.log(`\t${body.from + ++index} - ${hit._source.title} (score: ${hit._score})`));
-        })
-        .catch(console.error);
-};
-
 
 exports.findMinYear = function() {
-    return new Promise(function(resolve, reject) {
-        let body = {
-            size: 0,
-            aggs: {
-                min_year: {
-                    min: {
-                        field: "year"
-                    }
+    let body = {
+        aggs: {
+            min_year: {
+                min: {
+                    field: "year"
                 }
             }
         }
-
+    }
+    return new Promise(function(resolve, reject) {
         search("library", body).then((result) => {
-            console.log(result);
             resolve(result);
         });
     });
@@ -231,21 +64,85 @@ exports.findMinYear = function() {
 
 
 exports.findMaxYear = function() {
-    return new Promise(function(resolve, reject) {
-        let body = {
-            size: 0,
-            aggs: {
-                max_year: {
-                    max: {
-                        field: "year"
-                    }
+    let body = {
+        aggs: {
+            max_year: {
+                max: {
+                    field: "year"
                 }
             }
         }
-
+    }
+    return new Promise(function(resolve, reject) {
         search("library", body).then((result) => {
-            console.log(result);
             resolve(result);
         });
+    })
+}
+
+
+exports.searchMultiMatch = function(searchTerm, fields, fromYear, toYear, from) {
+    let body = {
+        _source: ["authors", "title", "link"],
+        size: 20,
+        from: from,
+        query: {
+            bool: {
+                must: {
+                    multi_match: {
+                        query: searchTerm,
+                        fields: fields,
+                        operator: "and"
+                    }
+                },
+                filter: {
+                    range: {
+                        year: {
+                            gte: fromYear,
+                            lte: toYear
+                        }
+                    }
+                }
+            }
+        },
+        highlight: {
+            fields: {
+                title: {},
+                "authors.lastname": {}
+            },
+            pre_tags: ["<strong>"],
+            post_tags: ["</strong>"]
+        }
+    };
+
+    return new Promise(function(resolve, reject) {
+        search('library', body)
+            .then(results => {
+                console.log(`found ${results.hits.total} items in ${results.took}ms`);
+                if (results.hits.total > 0) console.log(`returned article titles:`);
+                console.log(results);
+                resolve(results);
+            })
+            .catch(console.error);
+    })
+};
+
+
+exports.getArticle = function (id) {
+    let body = {
+        _source: ["body"],
+        query: {
+            terms: {
+                _id: [id]
+            }
+        }
+    }
+
+    return new Promise(function(resolve, reject) {
+        search('library', body)
+            .then(results => {
+                resolve(results.hits.hits[0]);
+            })
+            .catch(console.error);
     })
 }

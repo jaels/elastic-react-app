@@ -31,20 +31,16 @@ class Results extends Component {
 
       handleClickOnShowArticle(id) {
           elastic.getArticle(id).then((result=> {
-              console.log(result);
               this.setState({
                   articleBody: result._source.body,
                   showModal: true
               })
-
           }))
-
       }
 
       handleCloseModal() {
         this.setState({showModal: false});
       }
-
 
     render() {
         let {results, total, showModal, articleBody} = this.state;
@@ -59,10 +55,13 @@ class Results extends Component {
         return (
         <div>
         <Modal isOpen={showModal}>
-            <button onClick={this.handleCloseModal.bind(this)}>Close Modal</button>
+            <button onClick={this.handleCloseModal.bind(this)}
+            className="close-modal">Close Modal</button>
             <div>
                 {articleBody}
             </div>
+            <button onClick={this.handleCloseModal.bind(this)}
+            className="close-modal">Close Modal</button>
         </Modal>
         <h4>Found {total} Results</h4>
         <table>
@@ -70,7 +69,7 @@ class Results extends Component {
                 <tr>
                     <th> Title </th>
                     <th> Authors </th>
-                    <th> Link </th>
+                    <th> Year </th>
                     <th> Go to Article </th>
                 </tr>
             </thead>

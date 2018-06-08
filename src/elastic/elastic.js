@@ -83,7 +83,7 @@ exports.findMaxYear = function() {
 
 exports.searchMultiMatch = function(searchTerm, fields, fromYear, toYear, from) {
     let body = {
-        _source: ["authors", "title", "link"],
+        _source: ["authors", "title", "year"],
         size: 20,
         from: from,
         query: {

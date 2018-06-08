@@ -22,14 +22,14 @@ class App extends Component {
     }
 
     componentWillMount() {
-            // elastic.indexing('library', 'default', data).then(()=>{
+            elastic.indexing('library', 'default', data).then(()=>{
                 elastic.findMinYear().then(result => {
                     this.setState({fromYear: result.aggregations.min_year.value})
                     elastic.findMaxYear().then(result => {
                         this.setState({toYear: result.aggregations.max_year.value})
                     })
                 })
-            // });
+            });
     }
 
     handleSubmit() {
@@ -71,10 +71,11 @@ class App extends Component {
     }
 
     handleClickOnPrev() {
-        this.setState({
-            from: this.state.from-=20,
-            currentPage: this.state.currentPage-=1
-            })
+        this.setState(
+            prevState => ({
+                from: prevState.from-=20,
+                currentPage: prevState.currentPage-=1
+                }))
         let {searchTerm, fromYear, toYear, checkedBoxes, currentPage, from} = this.state;
         elastic.searchMultiMatch(searchTerm, checkedBoxes, fromYear, toYear, from).then((results) => {
             this.setState({
@@ -84,10 +85,11 @@ class App extends Component {
     }
 
     handleClickOnNext() {
-        this.setState({
-            from: this.state.from+=20,
-            currentPage: this.state.currentPage+=1
-            })
+        this.setState(
+            prevState => ({
+                from: prevState.from+=20,
+                currentPage: prevState.currentPage+=1
+                }))
         let {searchTerm, fromYear, toYear, checkedBoxes, currentPage, from} = this.state;
         elastic.searchMultiMatch(searchTerm, checkedBoxes, fromYear, toYear, from).then((results) => {
             this.setState({
@@ -104,49 +106,48 @@ class App extends Component {
                 <div className="input-area">
                     <input className="input-field" placeholder="what do you want to search?" onChange={this.handleSearchTermChange.bind(this)}/>
                     <h3>Search in:</h3>
-                    <label className="checkBox">
+                    <label className="container">
                         <input type="checkbox" name="firstname" value="authors.firsname" onChange={this.handleChangeInCheckbox.bind(this)}/>
                         {"Author's first name"}
+                        <span className="checkmark"></span>
                     </label>
-                    <label className="checkBox"><input type="checkbox" name="lastname" value="authors.lastname" onChange={this.handleChangeInCheckbox.bind(this)}/>
+                    <label className="container"><input type="checkbox" name="lastname" value="authors.lastname" onChange={this.handleChangeInCheckbox.bind(this)}/>
                         {"Author's last name"}
+                        <span className="checkmark"></span>
                     </label>
-                    <label className="checkBox"><input type="checkbox" name="title" value="title" onChange={this.handleChangeInCheckbox.bind(this)}/>
+                    <label className="container"><input type="checkbox" name="title" value="title" onChange={this.handleChangeInCheckbox.bind(this)}/>
                         Title of the article
+                        <span className="checkmark"></span>
                     </label>
-                    <label className="checkBox"><input type="checkbox" name="body" value="body" onChange={this.handleChangeInCheckbox.bind(this)}/>
+                    <label className="container"><input type="checkbox" name="body" value="body" onChange={this.handleChangeInCheckbox.bind(this)}/>
                         Body of the article
+                        <span className="checkmark"></span>
                     </label>
-                    <div>
-                    <label className="checkBox"><input type="text" name="fromYear" placeholder={fromYear}
+                    <div className="years-inputs">
+                        <label className="year-input">
+                     From year
+                     <input type="text" name="fromYear" placeholder={fromYear}
                     onChange={this.handleFromYaerChange.bind(this)}/>
-                        From year
                     </label>
-                    <label className="checkBox"><input type="text" name="fromYear" placeholder={toYear}
+                        <label className="year-input">
+                    To year
+                    <input type="text" name="toYear" placeholder={toYear}
                     onChange={this.handleToYaerChange.bind(this)}/>
-                        To year
                     </label>
                     </div>
                     <button id="submit-button" onClick={this.handleSubmit.bind(this)}>
                         Submit
-                    </button>
-                    {noResults ? <h3> No Results </h3> : ""}
+                    </button> {noResults ?
+                    <h3> No Results </h3> : ""}
                 </div>
                 <div>
-                {total > 0 ? <Results results={results}/> : ""}
+                    {total > 0 ?
+                    <Results results={results}/> : ""}
                 </div>
-                <div className={numOfPages === 0
-                    ? "noDisplay"
-                    : "pagination"}>
-                    <button className={currentPage == 1
-                        ? "noDisplay"
-                        : "page-button"} onClick={this.handleClickOnPrev.bind(this)}>prev</button>
-                    <p style={{
-                        display: "inline-block"
-                    }}>{currentPage}</p>
-                    <button className={currentPage == numOfPages
-                        ? "noDisplay"
-                        : "page-button"} disables="" onClick={this.handleClickOnNext.bind(this)}>next</button>
+                <div className={numOfPages===0 ? "noDisplay" : "pagination"}>
+                    <button className={currentPage==1 ? "noDisplay" : "page-button"} onClick={this.handleClickOnPrev.bind(this)}>prev</button>
+                    <p style={{ display: "inline-block" }}>{currentPage}</p>
+                    <button className={currentPage==numOfPages ? "noDisplay" : "page-button"} disables="" onClick={this.handleClickOnNext.bind(this)}>next</button>
                 </div>
             </div>
         );

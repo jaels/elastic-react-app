@@ -1,6 +1,6 @@
 .App {
-  text-align: center;
-  padding: 20px;
+    text-align: center;
+    padding: 20px;
 }
 
 .input-area {
@@ -8,30 +8,132 @@
 }
 
 .input-field {
-    height: 50px;
-    width: 300px;
-    margin: 0 auto;
-    display: block;
+    width: 80%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
     font-size: 16px;
+}
+
+button {
+    display: block;
+    margin: 0 auto;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
     text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
 }
 
 #submit-button {
-    display: block;
-    margin: 0 auto;
     margin-top: 15px;
     margin-bottom: 15px;
-
+    padding: 15px 32px;
+    font-size: 16px;
 }
 
-.checkBox {
+.go-to-btn {
+    font-size: 14px;
+}
+
+.page-button {
+    padding: 7px 15px;
+    font-size: 16px;
+    margin: 10px;
+}
+
+.close-modal {
+    padding: 7px 15px;
+    background-color: #2F4F4F;
+    margin: 15px auto;
+}
+
+.years-inputs {
+    margin-top: 20px;
+}
+
+.year-input {
     display: inline-block;
     margin-bottom: 30px;
     margin-right: 15px;
 }
 
+.year-input input {
+    height: 30px;
+    margin-left: 10px;
+}
+
+.container {
+    display: inline-block;
+    position: relative;
+    padding-left: 35px;
+    margin-right: 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+}
+
+.container:hover input~.checkmark {
+    background-color: #ccc;
+}
+
+.container input:checked~.checkmark {
+    background-color: #2196F3;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.container input:checked~.checkmark:after {
+    display: block;
+}
+
+.container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
 .noDisplay {
     display: none;
+}
+
+table {
+    margin: auto;
 }
 
 table, th, td {
